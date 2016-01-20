@@ -1,6 +1,6 @@
 %%% Configuration file
-%%% Permits various adjustments to parameters of the SLAM algorithm.
-%%% See ekfslam_sim.m for more information
+%%% Permits various adjustments to parameters of the FastSLAM algorithm.
+%%% See fastslam_sim.m for more information
 
 % control parameters
 V= 3; % m/s
@@ -27,11 +27,18 @@ R= [sigmaR^2 0; 0 sigmaB^2];
 AT_WAYPOINT= 1.0; % metres, distance from current waypoint at which to switch to next waypoint
 NUMBER_LOOPS= 2; % number of loops through the waypoint list
 
+% resampling
+NPARTICLES= 100; 
+NEFFECTIVE= 0.75*NPARTICLES; % minimum number of effective particles before resampling
+
 % switches
-SWITCH_CONTROL_NOISE= 1; % if 0, velocity and gamma are perfect
-SWITCH_SENSOR_NOISE = 1; % if 0, measurements are perfect
-SWITCH_INFLATE_NOISE= 0; % if 1, the estimated Q and R are inflated (ie, add stabilising noise)
-SWITCH_HEADING_KNOWN= 0; % if 1, the vehicle heading is observed directly at each iteration
+SWITCH_CONTROL_NOISE= 1;
+SWITCH_SENSOR_NOISE = 1;
+SWITCH_INFLATE_NOISE= 0;
+SWITCH_PREDICT_NOISE = 0;   % sample noise from predict (usually 1 for fastslam1.0 and 0 for fastslam2.0)
+SWITCH_SAMPLE_PROPOSAL = 1; % sample from proposal (no effect on fastslam1.0 and usually 1 for fastslam2.0)
+SWITCH_HEADING_KNOWN= 0;
+SWITCH_RESAMPLE= 1; 
+SWITCH_PROFILE= 1;
 SWITCH_SEED_RANDOM= 0; % if not 0, seed the randn() with its value at beginning of simulation (for repeatability)
-SWITCH_PROFILE= 0; % if 1, turn on MatLab profiling to measure time consumed by simulator functions
-SWITCH_GRAPHICS= 1; % if 0, avoids plotting most animation data to maximise simulation speed
+
