@@ -18,6 +18,7 @@ pcov= make_covariance_ellipses(particles(ii(1)));
 if ~isempty(pcov), set(h.cov, 'xdata', pcov(1,:), 'ydata', pcov(2,:)); end
 
 drawnow
+hold off
 end
 
 function p= make_covariance_ellipses(particle)
