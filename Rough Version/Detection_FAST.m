@@ -1,13 +1,21 @@
 %Detection of 3D landmarks using FAST corner detection and SFM
 %Xuechen Liu 2015
 
+close all; clear;
+w = warning ('off','all');
+
 format compact
 path(path, '../')
 
-video = VideoReader('testing1.mp4');
+video = VideoReader('rgbd_dataset_freiburg1_desk-rgb.mp4');
 
 %Load camera parameters
 load upToScaleReconstructionCameraParameters.mat
+
+%Initialize the window
+figure(10);
+title('Unscented FastSLAM 2.1: Predict updated by UKF');
+hold on;
 
 while(hasFrame(video)),
     
@@ -20,6 +28,7 @@ while(hasFrame(video)),
     %Extract and match features using FAST
     points1 = detectFASTFeatures(rgb2gray(frame1));
     points2 = detectFASTFeatures(rgb2gray(frame2));
+    featurepoints = points2;
     [features1, valid_points1] = extractFeatures(rgb2gray(frame1), points1);
     [features2, valid_points2] = extractFeatures(rgb2gray(frame2), points2);
     pairs = matchFeatures(features1, features2);
@@ -37,6 +46,12 @@ while(hasFrame(video)),
     [points2, validIdx] = step(tracker, frame2);
     matchedPoints1 = points1(validIdx, :);
     matchedPoints2 = points2(validIdx, :);
+    
+    % If not enough matched points, move on to next frame
+    dim = size(matchedPoints1);
+    if dim(1) < 20
+        continue;
+    end
     
     % Estimate the fundamental matrix
     [fMatrix, epipolarInliers] = estimateFundamentalMatrix(...
@@ -63,14 +78,26 @@ while(hasFrame(video)),
     end
     
     %Landmark Assignment
-    lm = [points3D(1:30,1),points3D(1:30,3)]';
+    dim = size(points3D);
+    if dim(1) > 30,
+        lm = [points3D(1:30,1),points3D(1:30,3)]';
+    else
+        lm = [points3D(1:dim(1),1),points3D(1:dim(1),3)]';
+    end
     
-    if abs(floor(lm(1,1) / 10)) > 0
+    if abs(floor(min(min(lm)) / 10)) > 0
         [e,k] = scaling(min(min(lm)));
         lm = lm ./ (10^e);
     end
     
+    if max(max(lm)) < 0.01
+        continue;
+    end
+    
+    h= setup_animations(lm, rgb2gray(frame2), featurepoints);
+    
     %Performing UFastSLAM
-    UFastSLAM2(lm,t',R);
+    UFastSLAM2(lm,t',R,h);
+    %t = timeit(UFastSLAM2); 
     
 end

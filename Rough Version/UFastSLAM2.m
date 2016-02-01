@@ -1,4 +1,4 @@
-function update_data = UFastSLAM2(lm,pose,Rotation)
+function update_data = UFastSLAM2(lm,pose,Rotation,h)
 %This function is designed for Final Year Project: Monocular SLAM
 %This function is inspired by the one designed by Bailey, but with UKF
 %replacing EKF and data from prior vision system.
@@ -22,14 +22,13 @@ function update_data = UFastSLAM2(lm,pose,Rotation)
 configfile; %Load default parameters(think the camera fixed on a robot)
 
 %Compute steering angle from rotation
-Rot = vrrotmat2vec(Rotation); G = Rot(4);
+Rot = vrrotmat2vec(Rotation);
+G = Rot(4);
 
 % initialisations
 particles= particle_generator(NPARTICLES);
 xtrue= zeros(3,1);
 veh= [0 -WHEELBASE/10 -WHEELBASE/10; 0 -0.1 0.1];
-
-h= setup_animations(lm);
 
 Qe= Q; Re= R;
 if SWITCH_INFLATE_NOISE==1, Qe= 2*Q; Re= 2*R; end
@@ -51,7 +50,11 @@ end
 %Observation
 [z,ftag_visible]= get_observations(xtrue, lm, ftag, MAX_RANGE);
 z= add_observation_noise(z,R, SWITCH_SENSOR_NOISE);
+plines = [];
 if ~isempty(z), plines= make_laser_lines (z,xtrue); end
+
+if isempty(plines), close;return;end
+
         
 %Data Association
 Nf= size(particles(1).xf,2);

@@ -1,5 +1,6 @@
 function do_plot(h, particles, xtrue, plines, veh)
 
+hold on
 xvp = [particles.xv];
 xfp = [particles.xf];
 w = [particles.w]; 
@@ -13,11 +14,13 @@ set(h.xt, 'xdata', xt(1,:), 'ydata', xt(2,:))
 set(h.xm, 'xdata', xm(1,:), 'ydata', xm(2,:))
 set(h.xvp, 'xdata', xvp(1,:), 'ydata', xvp(2,:))
 if ~isempty(xfp), set(h.xfp, 'xdata', xfp(1,:), 'ydata', xfp(2,:)), end
-if ~isempty(plines), set(h.obs, 'xdata', plines(1,:), 'ydata', plines(2,:)), end
+%if ~isempty(plines), set(h.obs, 'xdata', plines(1,:), 'ydata', plines(2,:)), end
 pcov= make_covariance_ellipses(particles(ii(1)));
 if ~isempty(pcov), set(h.cov, 'xdata', pcov(1,:), 'ydata', pcov(2,:)); end
 
 drawnow
+pause(0.01);
+hold off
 end
 
 function p= make_covariance_ellipses(particle)
